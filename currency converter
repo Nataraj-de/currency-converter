@@ -1,0 +1,57 @@
+import requests
+
+# Function to get real-time exchange rates from the API
+def get_exchange_rate(api_key, base_currency, target_currency):
+    # API URL with the base currency
+    url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/{base_currency}"
+    
+    try:
+        # Make a request to the API
+        response = requests.get(url)
+        
+        # If response is not OK, raise an exception
+        if response.status_code != 200:
+            raise Exception(f"API request failed with status code {response.status_code}")
+
+        # Parse the JSON response
+        data = response.json()
+        
+        # Check if conversion rates exist in the response
+        if "conversion_rates" in data:
+            rates = data['conversion_rates']
+            return rates.get(target_currency, None)  # Get the exchange rate for the target currency
+        else:
+            print(f"Error: {data.get('error-type')}")
+            return None
+    except Exception as e:
+        print(f"Error fetching data from the API: {e}")
+        return None
+
+# Function to convert the currency
+def convert_currency(amount, exchange_rate):
+    return amount * exchange_rate
+
+# Main function to handle user input and output
+def currency_converter():
+    api_key = "177b57cba8bf1f43c94a50ee" # Replace with your actual API key
+    print("Welcome to the Currency Converter!")
+
+    # Get input from the user
+    amount = float(input("Enter the amount to convert: "))
+    base_currency = input("Enter the base currency (e.g., USD): ").upper()
+    target_currency = input("Enter the target currency (e.g., EUR): ").upper()
+    
+    # Fetch the exchange rate
+    exchange_rate = get_exchange_rate(api_key, base_currency, target_currency)
+    
+    if exchange_rate is not None:
+        # Convert the currency using the fetched exchange rate
+        converted_amount = convert_currency(amount, exchange_rate)
+        print(f"{amount} {base_currency} is equal to {converted_amount:.2f} {target_currency}.")
+    else:
+        print("Error fetching exchange rate. Please check the currency codes or API key.")
+
+# Run the currency converter
+if __name__ == "__main__":
+    currency_converter()
+
